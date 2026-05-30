@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>인증 완료</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      background: #0d0f13;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .bg-orbs { position: fixed; inset: 0; pointer-events: none; }
+    .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.2; }
+    .orb-1 { width: 500px; height: 500px; background: #57f287; top: -150px; left: -100px; }
+    .orb-2 { width: 400px; height: 400px; background: #5865f2; bottom: -100px; right: -80px; }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .checkmark {
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(135deg, #57f287, #3ba55c);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 50px;
+      margin: 0 auto 32px;
+      box-shadow: 0 0 60px rgba(87, 242, 135, 0.5);
+      animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), glow 2s ease-in-out 0.5s infinite;
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    @keyframes glow {
+      0%, 100% { box-shadow: 0 0 40px rgba(87, 242, 135, 0.4); }
+      50% { box-shadow: 0 0 80px rgba(87, 242, 135, 0.7); }
+    }
+
+    .card {
+      background: rgba(30, 33, 47, 0.85);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(87, 242, 135, 0.3);
+      border-radius: 24px;
+      padding: 48px 40px;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      animation: slideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(40px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .avatar {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      border: 3px solid #57f287;
+      margin: 0 auto 16px;
+      display: block;
+    }
+
+    h1 { font-size: 26px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+    .username { font-size: 16px; color: #57f287; margin-bottom: 16px; font-weight: 600; }
+    p { font-size: 14px; color: #8a8f98; line-height: 1.7; }
+
+    .confetti-container {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .confetti-piece {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      top: -10px;
+      border-radius: 2px;
+      animation: fall linear forwards;
+    }
+    @keyframes fall {
+      to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+  </div>
+  <div class="confetti-container" id="confetti"></div>
+
+  <div class="container">
+    <div class="checkmark">✅</div>
+    <div class="card">
+      <img class="avatar" id="avatar" src="" alt="" />
+      <h1>인증 완료!</h1>
+      <div class="username" id="username"></div>
+      <p>
+        디스코드 계정 인증이 성공적으로 완료되었습니다.<br>
+        역할이 자동으로 부여되었습니다.<br><br>
+        이 창을 닫고 서버로 돌아가세요. 🎉
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const p = new URLSearchParams(location.search);
+    const name = p.get('name') || '사용자';
+    const avatar = p.get('avatar');
+    const id = p.get('id');
+
+    document.getElementById('username').textContent = name + '님';
+
+    const avatarEl = document.getElementById('avatar');
+    if (avatar && id) {
+      avatarEl.src = `https://cdn.discordapp.com/avatars/${id}/${avatar}.png`;
+    } else if (id) {
+      avatarEl.src = `https://cdn.discordapp.com/embed/avatars/${parseInt(id) % 5}.png`;
+    } else {
+      avatarEl.style.display = 'none';
+    }
+
+    const colors = ['#5865f2','#57f287','#fee75c','#eb459e','#ed4245','#ffa07a'];
+    const container = document.getElementById('confetti');
+    for (let i = 0; i < 60; i++) {
+      const el = document.createElement('div');
+      el.className = 'confetti-piece';
+      el.style.left = Math.random() * 100 + '%';
+      el.style.background = colors[Math.floor(Math.random() * colors.length)];
+      el.style.animationDuration = (2 + Math.random() * 3) + 's';
+      el.style.animationDelay = (Math.random() * 2) + 's';
+      el.style.width = el.style.height = (6 + Math.random() * 8) + 'px';
+      container.appendChild(el);
+    }
+  </script>
+</body>
+</html>
