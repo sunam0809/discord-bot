@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: discord-recovery-bot
+    runtime: node
+    region: singapore
+    plan: free
+    buildCommand: npm install -g pnpm && pnpm install --no-frozen-lockfile && pnpm --filter @workspace/api-server run build
+    startCommand: pnpm --filter @workspace/api-server run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DISCORD_BOT_TOKEN
+        sync: false
+      - key: DISCORD_CLIENT_ID
+        sync: false
+      - key: DISCORD_CLIENT_SECRET
+        sync: false
+      - key: BOT_SECRET
+        sync: false
+      - key: SITE_URL
+        sync: false
