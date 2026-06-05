@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Discord 인증 시스템</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: #00000f;
+    color: #c8d8ff;
+    font-family: 'Share Tech Mono', monospace;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  #matrix { position: fixed; inset: 0; z-index: 0; opacity: 0.15; }
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,20,.12) 2px, rgba(0,0,20,.12) 4px);
+    pointer-events: none;
+    z-index: 10;
+  }
+  .container {
+    position: relative;
+    z-index: 5;
+    width: 90%;
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+    text-align: center;
+  }
+  .badge {
+    font-size: 10px;
+    letter-spacing: 6px;
+    color: #0066ff;
+    text-transform: uppercase;
+    animation: fadeIn 1s ease;
+    border: 1px solid #001844;
+    padding: 6px 16px;
+    border-radius: 2px;
+  }
+  .title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(32px, 7vw, 56px);
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 0 0 20px #00d4ffaa, 0 0 50px #0066ff55;
+    line-height: 1.15;
+    animation: fadeInUp .8s ease .2s both;
+    position: relative;
+  }
+  .title span { color: #00d4ff; }
+  .title::before {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    color: #00d4ff;
+    animation: glitch1 4s infinite;
+    clip-path: polygon(0 20%, 100% 20%, 100% 40%, 0 40%);
+    opacity: 0.6;
+  }
+  .subtitle {
+    font-size: 14px;
+    color: #3355aa;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    animation: fadeInUp .8s ease .3s both;
+  }
+  .desc {
+    font-size: 13px;
+    color: #446699;
+    line-height: 2;
+    max-width: 480px;
+    animation: fadeInUp .8s ease .4s both;
+  }
+  .features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    width: 100%;
+    animation: fadeInUp .8s ease .5s both;
+  }
+  .feat {
+    background: linear-gradient(135deg, #060616, #080820);
+    border: 1px solid #0a1a44;
+    border-radius: 4px;
+    padding: 18px 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  .feat::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #00d4ff55, transparent);
+  }
+  .feat-icon { font-size: 22px; margin-bottom: 8px; }
+  .feat-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: #00d4ff;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .feat-desc { font-size: 10px; color: #2a4466; line-height: 1.7; }
+  .status-bar {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-size: 10px;
+    color: #1a3355;
+    letter-spacing: 2px;
+    animation: fadeIn 1s ease 1s both;
+  }
+  .status-dot {
+    width: 6px; height: 6px;
+    background: #00ff88;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #00ff88;
+    animation: pulse 2s infinite;
+    flex-shrink: 0;
+  }
+  .status-online { color: #00ff88; }
+  @keyframes glitch1 {
+    0%,93%,100% { transform: translate(0); }
+    94% { transform: translate(-2px, 1px); }
+    96% { transform: translate(2px, -1px); }
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+  @keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+  @media (max-width: 480px) {
+    .features { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<canvas id="matrix"></canvas>
+<div class="container">
+  <div class="badge">⬡ DISCORD SECURITY SYSTEM ⬡</div>
+  <div>
+    <div class="title" data-text="인증 시스템">인증 <span>시스템</span></div>
+    <div class="subtitle">SERVER VERIFICATION &amp; RECOVERY</div>
+  </div>
+  <div class="desc">
+    Discord 서버를 위한 고급 인증 및 복구 시스템입니다.<br>
+    OAuth2 기반 인증, 역할 자동 부여, 서버 이전 시 유저 복구를 지원합니다.
+  </div>
+  <div class="features">
+    <div class="feat">
+      <div class="feat-icon">🔐</div>
+      <div class="feat-title">인증창</div>
+      <div class="feat-desc">채널에 인증 패널 생성. 역할 자동 부여 및 웹훅 로그 지원.</div>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">🗝️</div>
+      <div class="feat-title">복구키 생성</div>
+      <div class="feat-desc">서버 이전 시 사용할 1회용 복구 키를 발급합니다.</div>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">📨</div>
+      <div class="feat-title">복구키 사용</div>
+      <div class="feat-desc">기존 인증 유저 전체에게 새 서버 초대링크를 DM으로 전송.</div>
+    </div>
+  </div>
+  <div class="status-bar">
+    <div class="status-dot"></div>
+    <span class="status-online">SYSTEM ONLINE</span>
+    <span>//</span>
+    <span>SECURE CONNECTION</span>
+    <span>//</span>
+    <span id="clock">--:--:--</span>
+  </div>
+</div>
+<script>
+(function(){
+  const c=document.getElementById('matrix'),ctx=c.getContext('2d');
+  let d=[];
+  function r(){c.width=innerWidth;c.height=innerHeight;d=Array.from({length:Math.floor(c.width/16)},()=>Math.random()*-60)}
+  const ch='01アイウエオカキサシスタチツ#$%@!<>{}';
+  function draw(){
+    ctx.fillStyle='rgba(0,0,10,.05)';ctx.fillRect(0,0,c.width,c.height);
+    ctx.font='13px monospace';
+    d.forEach((y,i)=>{ctx.fillStyle=i%6===0?'#00d4ff':'#002266';ctx.fillText(ch[Math.floor(Math.random()*ch.length)],i*16,y*16);if(y*16>c.height&&Math.random()>.975)d[i]=0;d[i]++;});
+  }
+  r();window.addEventListener('resize',r);setInterval(draw,50);
+  setInterval(()=>{
+    const n=new Date();
+    document.getElementById('clock').textContent=n.toTimeString().substring(0,8);
+  },1000);
+})();
+</script>
+</body>
+</html>
