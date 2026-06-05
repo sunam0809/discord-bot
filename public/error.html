@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>오류 발생</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: #00000f;
+    color: #c8d8ff;
+    font-family: 'Share Tech Mono', monospace;
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  #matrix { position:fixed; inset:0; z-index:0; opacity:0.12; }
+  body::after {
+    content:''; position:fixed; inset:0;
+    background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(20,0,0,.12) 2px,rgba(20,0,0,.12) 4px);
+    pointer-events:none; z-index:10;
+  }
+  .container {
+    position:relative; z-index:5;
+    width:90%; max-width:440px;
+    display:flex; flex-direction:column; align-items:center; gap:24px;
+    text-align:center;
+  }
+  .icon-wrap {
+    width:90px; height:90px;
+    border-radius:50%;
+    border:2px solid #ff3344;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 30px #ff334466,0 0 60px #ff334422;
+    animation:popIn 0.6s cubic-bezier(0.34,1.56,0.64,1) both;
+    font-family:'Orbitron',sans-serif;
+    font-size:36px; color:#ff3344;
+  }
+  .title {
+    font-family:'Orbitron', sans-serif;
+    font-size:clamp(22px,5vw,30px);
+    font-weight:900; color:#ff3344;
+    text-shadow:0 0 20px #ff334488;
+    animation:fadeInUp 0.6s 0.4s ease both;
+  }
+  .subtitle { font-size:11px; letter-spacing:4px; color:#661122; text-transform:uppercase; animation:fadeInUp 0.6s 0.5s ease both; }
+  .panel {
+    width:100%;
+    background:linear-gradient(135deg,#0a0408,#100408);
+    border:1px solid #330011;
+    border-radius:4px; padding:24px;
+    animation:fadeInUp 0.6s 0.6s ease both;
+  }
+  .err-msg { font-size:13px; color:#cc3344; margin-bottom:14px; }
+  .hint { font-size:12px; color:#441122; line-height:1.8; }
+  .back-btn {
+    padding:12px 28px;
+    background:transparent; border:1px solid #ff3344;
+    color:#ff3344; font-family:'Orbitron',sans-serif;
+    font-size:11px; letter-spacing:3px; cursor:pointer;
+    border-radius:2px; text-decoration:none;
+    animation:fadeInUp 0.6s 0.8s ease both;
+    transition:all 0.3s;
+  }
+  .back-btn:hover { background:#ff334422; box-shadow:0 0 15px #ff334444; }
+  @keyframes popIn { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
+  @keyframes fadeInUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+</style>
+</head>
+<body>
+<canvas id="matrix"></canvas>
+<div class="container">
+  <div class="icon-wrap">!</div>
+  <div class="title">오류 발생</div>
+  <div class="subtitle">AUTHENTICATION ERROR</div>
+  <div class="panel">
+    <div class="err-msg" id="errMsg">알 수 없는 오류가 발생했습니다.</div>
+    <div class="hint">
+      Discord 채널로 돌아가서<br>
+      인증 버튼을 다시 눌러주세요.
+    </div>
+  </div>
+  <a href="javascript:window.close()" class="back-btn">창 닫기</a>
+</div>
+<script>
+const p=new URLSearchParams(location.search);
+const m=p.get('msg');
+if(m) document.getElementById('errMsg').textContent=decodeURIComponent(m);
+(function(){
+  const c=document.getElementById('matrix'),ctx=c.getContext('2d');
+  let d=[];
+  function r(){c.width=innerWidth;c.height=innerHeight;d=Array.from({length:Math.floor(c.width/16)},()=>Math.random()*-50)}
+  const ch='01#$%@!';
+  function draw(){
+    ctx.fillStyle='rgba(0,0,10,.05)';ctx.fillRect(0,0,c.width,c.height);
+    ctx.font='13px monospace';
+    d.forEach((y,i)=>{
+      ctx.fillStyle='#330011';
+      ctx.fillText(ch[Math.floor(Math.random()*ch.length)],i*16,y*16);
+      if(y*16>c.height&&Math.random()>.975)d[i]=0;d[i]++;
+    });
+  }
+  r();window.addEventListener('resize',r);setInterval(draw,50);
+})();
+</script>
+</body>
+</html>
