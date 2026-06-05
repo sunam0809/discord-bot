@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>인증 완료</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: #00000f;
+    color: #c8d8ff;
+    font-family: 'Share Tech Mono', monospace;
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  #matrix { position:fixed; inset:0; z-index:0; opacity:0.12; }
+  body::after {
+    content:''; position:fixed; inset:0;
+    background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,20,.12) 2px,rgba(0,0,20,.12) 4px);
+    pointer-events:none; z-index:10;
+  }
+  .container {
+    position:relative; z-index:5;
+    width:90%; max-width:440px;
+    display:flex; flex-direction:column; align-items:center; gap:24px;
+    text-align:center;
+  }
+  .check-wrap {
+    width:90px; height:90px;
+    border-radius:50%;
+    border:2px solid #00ff88;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 30px #00ff8866, 0 0 60px #00ff8833;
+    animation:popIn 0.6s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+  .check-wrap svg { animation:checkDraw 0.5s 0.3s ease both; opacity:0; }
+  .title {
+    font-family:'Orbitron', sans-serif;
+    font-size:clamp(22px,5vw,32px);
+    font-weight:900;
+    color:#00ff88;
+    text-shadow:0 0 20px #00ff8888;
+    animation:fadeInUp 0.6s 0.5s ease both;
+  }
+  .subtitle {
+    font-size:12px; letter-spacing:4px; color:#228844;
+    text-transform:uppercase;
+    animation:fadeInUp 0.6s 0.6s ease both;
+  }
+  .panel {
+    width:100%;
+    background:linear-gradient(135deg,#060616,#040c10);
+    border:1px solid #004422;
+    border-radius:4px;
+    padding:24px;
+    animation:fadeInUp 0.6s 0.7s ease both;
+    box-shadow:0 0 20px #00ff8822;
+  }
+  .user-line {
+    font-size:14px; color:#44cc88;
+    margin-bottom:14px;
+  }
+  .user-line span { color:#00ff88; }
+  .msg-line { font-size:12px; color:#226644; line-height:1.8; }
+  .close-note {
+    font-size:11px; color:#1a3322; letter-spacing:2px;
+    animation:fadeIn 0.6s 1.2s ease both;
+  }
+  @keyframes popIn { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
+  @keyframes checkDraw { to{opacity:1} }
+  @keyframes fadeInUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+</style>
+</head>
+<body>
+<canvas id="matrix"></canvas>
+<div class="container">
+  <div class="check-wrap">
+    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#00ff88" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+  </div>
+  <div class="title">인증 완료</div>
+  <div class="subtitle">AUTHENTICATION SUCCESSFUL</div>
+  <div class="panel">
+    <div class="user-line">접속자: <span id="userName">—</span></div>
+    <div class="msg-line">
+      ✅ 역할이 성공적으로 부여되었습니다.<br>
+      ✅ 인증 로그가 기록되었습니다.<br><br>
+      이 창을 닫고 Discord 서버로 돌아가세요.
+    </div>
+  </div>
+  <div class="close-note">// 이 창은 닫아도 됩니다</div>
+</div>
+<script>
+const p = new URLSearchParams(location.search);
+const u = p.get('user');
+if (u) document.getElementById('userName').textContent = decodeURIComponent(u);
+
+(function(){
+  const c=document.getElementById('matrix'),ctx=c.getContext('2d');
+  let d=[];
+  function r(){c.width=innerWidth;c.height=innerHeight;d=Array.from({length:Math.floor(c.width/16)},()=>Math.random()*-50)}
+  const ch='01アイウエオ#$%@!';
+  function draw(){
+    ctx.fillStyle='rgba(0,0,10,.05)';ctx.fillRect(0,0,c.width,c.height);
+    ctx.font='13px monospace';
+    d.forEach((y,i)=>{
+      ctx.fillStyle=i%4===0?'#00ff88':'#004422';
+      ctx.fillText(ch[Math.floor(Math.random()*ch.length)],i*16,y*16);
+      if(y*16>c.height&&Math.random()>.975)d[i]=0;d[i]++;
+    });
+  }
+  r();window.addEventListener('resize',r);setInterval(draw,50);
+})();
+</script>
+</body>
+</html>
