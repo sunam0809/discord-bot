@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>서버 인증 시스템</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue: #00d4ff;
+    --blue2: #0066ff;
+    --dark: #00000f;
+    --dark2: #050510;
+    --panel: #080818;
+    --border: #0044aa;
+    --glow: 0 0 20px #00d4ff88, 0 0 40px #0066ff44;
+    --glow-s: 0 0 10px #00d4ff66;
+  }
+
+  html, body { height: 100%; }
+
+  body {
+    background: var(--dark);
+    color: #c8d8ff;
+    font-family: 'Share Tech Mono', monospace;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Matrix rain */
+  #matrix {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    opacity: 0.18;
+  }
+
+  /* Scanlines overlay */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,20,0.15) 2px,
+      rgba(0,0,20,0.15) 4px
+    );
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  .container {
+    position: relative;
+    z-index: 5;
+    width: 90%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+  }
+
+  /* Header logo */
+  .logo {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 6px;
+    color: var(--blue);
+    text-transform: uppercase;
+    opacity: 0.7;
+    animation: fadeIn 1s ease;
+  }
+
+  /* Glitch title */
+  .title-wrap {
+    text-align: center;
+    animation: fadeInUp 0.8s ease 0.2s both;
+  }
+
+  .title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(28px, 6vw, 42px);
+    font-weight: 900;
+    color: #fff;
+    text-shadow: var(--glow);
+    position: relative;
+    display: inline-block;
+    letter-spacing: 2px;
+  }
+
+  .title::before, .title::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    display: block;
+  }
+  .title::before {
+    color: #00d4ff;
+    animation: glitch1 3.5s infinite;
+    clip-path: polygon(0 30%, 100% 30%, 100% 50%, 0 50%);
+  }
+  .title::after {
+    color: #ff0066;
+    animation: glitch2 3.5s infinite;
+    clip-path: polygon(0 60%, 100% 60%, 100% 75%, 0 75%);
+  }
+
+  .subtitle {
+    margin-top: 10px;
+    font-size: 13px;
+    color: #4488cc;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  /* Panel card */
+  .panel {
+    width: 100%;
+    background: linear-gradient(135deg, #060616 0%, #080820 100%);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 30px 28px;
+    position: relative;
+    animation: fadeInUp 0.8s ease 0.4s both;
+    box-shadow: var(--glow), inset 0 0 40px rgba(0,50,150,0.1);
+  }
+
+  .panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--blue), var(--blue2), transparent);
+    animation: scanLine 3s ease-in-out infinite;
+  }
+
+  .panel-corner {
+    position: absolute;
+    width: 12px; height: 12px;
+    border-color: var(--blue);
+    border-style: solid;
+  }
+  .panel-corner.tl { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+  .panel-corner.tr { top: -1px; right: -1px; border-width: 2px 2px 0 0; }
+  .panel-corner.bl { bottom: -1px; left: -1px; border-width: 0 0 2px 2px; }
+  .panel-corner.br { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #0a1a40;
+  }
+
+  .status-dot {
+    width: 8px; height: 8px;
+    background: var(--blue);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--blue);
+    animation: pulse 2s ease infinite;
+    flex-shrink: 0;
+  }
+
+  .panel-label {
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--blue);
+    text-transform: uppercase;
+  }
+
+  .info-grid {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .info-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+  }
+
+  .info-key {
+    color: #2266aa;
+    min-width: 80px;
+    font-size: 11px;
+    letter-spacing: 1px;
+  }
+
+  .info-val {
+    color: #88bbff;
+    font-size: 13px;
+  }
+
+  .info-val.highlight {
+    color: var(--blue);
+    text-shadow: 0 0 8px var(--blue);
+  }
+
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #0a2a60, transparent);
+    margin: 4px 0;
+  }
+
+  /* Auth button */
+  .btn-verify {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #001a44 0%, #002266 50%, #001a44 100%);
+    border: 1px solid var(--blue);
+    color: var(--blue);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    box-shadow: var(--glow-s);
+  }
+
+  .btn-verify::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 0%, rgba(0,212,255,0.08) 50%, transparent 100%);
+    transform: translateX(-100%);
+    transition: transform 0.5s;
+  }
+
+  .btn-verify:hover {
+    background: linear-gradient(135deg, #002266 0%, #003388 50%, #002266 100%);
+    color: #fff;
+    box-shadow: var(--glow);
+    transform: translateY(-1px);
+  }
+
+  .btn-verify:hover::before { transform: translateX(100%); }
+  .btn-verify:active { transform: translateY(0); }
+
+  .btn-verify svg { flex-shrink: 0; }
+
+  /* Warning */
+  .warning {
+    font-size: 11px;
+    color: #334466;
+    text-align: center;
+    letter-spacing: 1px;
+    line-height: 1.7;
+    animation: fadeInUp 0.8s ease 0.8s both;
+  }
+
+  .warning span { color: #446688; }
+
+  /* Bottom bar */
+  .bottom-bar {
+    display: flex;
+    gap: 20px;
+    font-size: 10px;
+    color: #1a2a44;
+    letter-spacing: 2px;
+    animation: fadeIn 1s ease 1s both;
+  }
+
+  /* Loading state */
+  .loading-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,10,0.92);
+    z-index: 100;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+  }
+  .loading-overlay.active { display: flex; }
+
+  .loader {
+    width: 50px; height: 50px;
+    border: 2px solid #0a1a30;
+    border-top-color: var(--blue);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  .loading-text {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    letter-spacing: 4px;
+    color: var(--blue);
+    animation: blink 1s step-end infinite;
+  }
+
+  /* Keyframes */
+  @keyframes glitch1 {
+    0%,94%,100% { transform: translate(0); }
+    95% { transform: translate(-3px, 1px); }
+    97% { transform: translate(3px, -1px); }
+  }
+  @keyframes glitch2 {
+    0%,92%,100% { transform: translate(0); }
+    93% { transform: translate(3px, 2px); }
+    96% { transform: translate(-3px, -2px); }
+  }
+  @keyframes scanLine {
+    0% { opacity: 0.3; background-position: 0% 50%; }
+    50% { opacity: 1; }
+    100% { opacity: 0.3; background-position: 100% 50%; }
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; box-shadow: 0 0 8px var(--blue); }
+    50% { opacity: 0.4; box-shadow: 0 0 4px var(--blue); }
+  }
+  @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
+  @keyframes fadeInUp { from { opacity:0; transform:translateY(20px) } to { opacity:1; transform:translateY(0) } }
+  @keyframes spin { to { transform:rotate(360deg) } }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+</style>
+</head>
+<body>
+<canvas id="matrix"></canvas>
+
+<div class="container">
+  <div class="logo">SECURITY VERIFICATION SYSTEM</div>
+
+  <div class="title-wrap">
+    <div class="title" data-text="인증 센터">인증 센터</div>
+    <div class="subtitle">ACCESS CONTROL PORTAL</div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-corner tl"></div>
+    <div class="panel-corner tr"></div>
+    <div class="panel-corner bl"></div>
+    <div class="panel-corner br"></div>
+
+    <div class="panel-header">
+      <div class="status-dot"></div>
+      <div class="panel-label">SYSTEM ONLINE — AWAITING AUTHENTICATION</div>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-row">
+        <div class="info-key">PROTOCOL</div>
+        <div class="info-val highlight">DISCORD OAUTH2</div>
+      </div>
+      <div class="divider"></div>
+      <div class="info-row">
+        <div class="info-key">STATUS</div>
+        <div class="info-val highlight" id="statusText">READY</div>
+      </div>
+      <div class="divider"></div>
+      <div class="info-row">
+        <div class="info-key">EXPIRES</div>
+        <div class="info-val" id="expiresText">10:00</div>
+      </div>
+    </div>
+
+    <a id="authBtn" href="#" class="btn-verify" onclick="startAuth(event)">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/>
+      </svg>
+      DISCORD 로 인증하기
+    </a>
+  </div>
+
+  <div class="warning">
+    <span>⚠</span> 이 인증은 Discord 공식 OAuth2 프로토콜을 사용합니다.<br>
+    비밀번호 및 토큰은 수집되지 않습니다.
+  </div>
+
+  <div class="bottom-bar">
+    <span>SECURE CONNECTION</span>
+    <span>//</span>
+    <span>ENCRYPTED</span>
+    <span>//</span>
+    <span>v2.0</span>
+  </div>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loader"></div>
+  <div class="loading-text">CONNECTING...</div>
+</div>
+
+<script>
+// Matrix rain
+(function() {
+  const canvas = document.getElementById('matrix');
+  const ctx = canvas.getContext('2d');
+  let drops = [];
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const cols = Math.floor(canvas.width / 16);
+    drops = Array.from({ length: cols }, () => Math.random() * -50);
+  }
+
+  const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノ#$%@!<>[]{}';
+
+  function draw() {
+    ctx.fillStyle = 'rgba(0,0,10,0.05)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#0066ff';
+    ctx.font = '13px Share Tech Mono';
+
+    drops.forEach((y, i) => {
+      const char = chars[Math.floor(Math.random() * chars.length)];
+      ctx.fillStyle = i % 5 === 0 ? '#00d4ff' : '#0044aa';
+      ctx.fillText(char, i * 16, y * 16);
+      if (y * 16 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+      drops[i]++;
+    });
+  }
+
+  resize();
+  window.addEventListener('resize', resize);
+  setInterval(draw, 50);
+})();
+
+// Token from URL
+const params = new URLSearchParams(location.search);
+const token = params.get('token');
+const authBtn = document.getElementById('authBtn');
+
+if (token) {
+  authBtn.href = `/auth/start?token=${encodeURIComponent(token)}`;
+} else {
+  document.getElementById('statusText').textContent = 'ERROR';
+  authBtn.style.opacity = '0.4';
+  authBtn.style.pointerEvents = 'none';
+}
+
+// Countdown (10 min)
+let seconds = 600;
+const expiresEl = document.getElementById('expiresText');
+const iv = setInterval(() => {
+  seconds--;
+  if (seconds <= 0) {
+    clearInterval(iv);
+    expiresEl.textContent = 'EXPIRED';
+    document.getElementById('statusText').textContent = 'TIMEOUT';
+    authBtn.style.opacity = '0.4';
+    authBtn.style.pointerEvents = 'none';
+    return;
+  }
+  const m = String(Math.floor(seconds / 60)).padStart(2, '0');
+  const s = String(seconds % 60).padStart(2, '0');
+  expiresEl.textContent = `${m}:${s}`;
+}, 1000);
+
+function startAuth(e) {
+  if (!token) { e.preventDefault(); return; }
+  document.getElementById('loadingOverlay').classList.add('active');
+}
+</script>
+</body>
+</html>
